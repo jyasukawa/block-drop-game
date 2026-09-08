@@ -1,0 +1,142 @@
+:root {
+  --bg: #0b0d13;
+  --panel: #141824;
+  --line: #232838;
+  --text: #e6e8ef;
+  --muted: #8b93a7;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  /* スワイプ操作でページが引っ張られると操作にならないため、既定動作を止める */
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+}
+
+#stage {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+#board {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0f1117;
+}
+
+#panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 108px;
+}
+
+.preview {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px;
+}
+
+.preview h2 {
+  margin: 0 0 4px;
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.preview canvas { display: block; width: 100%; height: auto; }
+
+#stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12px;
+}
+
+#stats dt { color: var(--muted); letter-spacing: .1em; font-size: 10px; align-self: center; }
+#stats dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+#controls { display: flex; flex-direction: column; gap: 6px; }
+
+#controls button {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 10px 8px;
+  font-size: 11px;
+  letter-spacing: .1em;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#controls button:active { background: #1d2333; }
+
+/* id セレクタはブラウザ既定の [hidden]{display:none} より優先度が高い。
+   これを書かないと element.hidden = true にしても消えず、全画面の overlay が
+   ボタンのクリックを奪い続ける（暗幕も出っぱなしになる）。 */
+#overlay[hidden] { display: none; }
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  text-align: center;
+  background: rgba(11, 13, 19, .82);
+  backdrop-filter: blur(2px);
+  /* 全画面を覆うので、これが無いとポーズ中に PAUSE ボタンを押せず再開できない。
+     キーボードの無いスマホでは詰みになる。表示は overlay、操作は下の要素に通す。 */
+  pointer-events: none;
+}
+#overlay-title { margin: 0; font-size: 24px; font-weight: 700; }
+#overlay-hint { margin: 0; font-size: 13px; color: var(--muted); }
+
+#keyhelp { margin: 0; font-size: 11px; color: var(--muted); text-align: center; max-width: 40rem; }
+
+/* 横向きスマホ。ボタンが縦に3つ並ぶとパネル自体が画面より高くなり、
+   盤面をいくら縮めてもページが縦スクロールしてしまう */
+@media (max-height: 480px) {
+  #controls { flex-direction: row; }
+  #controls button { flex: 1; padding: 8px 6px; }
+  #keyhelp { display: none; }
+}
+
+/* 縦長の画面では横並びをやめ、パネルを盤面の下に回す */
+@media (max-width: 560px) {
+  #stage { flex-direction: column; align-items: center; }
+  #panel { flex-direction: row; flex-wrap: wrap; justify-content: center; min-width: 0; width: 100%; }
+  #controls { flex-direction: row; flex: 1 1 100%; }
+  #controls button { flex: 1; padding: 14px 8px; }
+  #keyhelp { display: none; }
+}
