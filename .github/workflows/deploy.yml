@@ -11,10 +11,11 @@ on:
   # 手動でも実行できるようにしておく（Pages の設定を変えた直後の確認に要る）
   workflow_dispatch:
 
+# 既定は読み取りのみ。書き込み権限は必要なジョブにだけ与える。
+# ここに pages: write と id-token: write を置くと、コードを取得して
+# ビルドするだけのジョブにも公開権限が付いてしまう。
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # 公開は1つずつ。走行中のデプロイは止めない（中断すると中途半端な状態で公開されうる）
 concurrency:
@@ -52,6 +53,10 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # 公開に必要な権限はこのジョブにだけ与える。コードの取得はしない。
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
