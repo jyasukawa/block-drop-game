@@ -1,0 +1,60 @@
+# main への push で GitHub Pages を更新する。
+#
+# ビルド成果物（dist/）をリポジトリにコミットしない方針なので、
+# Actions 側でビルドして Pages に直接アップロードする。
+# こうしておくと「ビルドを忘れて古い dist が公開される」という事故が起きない。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # 手動でも実行できるようにしておく（Pages の設定を変えた直後の確認に要る）
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 公開は1つずつ。走行中のデプロイは止めない（中断すると中途半端な状態で公開されうる）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # 型チェックとテストを通してから公開する。
+      # 壊れたものが公開URLに出るほうが、デプロイが失敗するより困る。
+      - run: pnpm typecheck
+      - run: pnpm test
+
+      - run: pnpm build
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
