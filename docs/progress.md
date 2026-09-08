@@ -6,6 +6,29 @@
 
 ---
 
+## 2026-09-08 — 公開後のセキュリティ対処
+
+公開リポジトリであることを踏まえて全面的に調査し、見つかった問題に対処した。
+
+**見つかった問題と対処**
+
+1. **コミットの author に個人の Gmail アドレスが入っており、push 済みで公開されていた。** GitHub のプロフィール上のメールを非公開にしていても、コミットの author 情報は別枠で公開される。全15コミットを noreply アドレス（`145903307+jyasukawa@users.noreply.github.com`）に書き換えて force push。ツリーハッシュ `5987f4c` が一致することで、コードとドキュメントの内容が無変更であることを確認した
+2. **書き換え後も Actions と Deployments に旧コミットSHAが残っており、そこから2手で元のメールに到達できた。** 「SHAを知らなければ辿れない」という前提が、SHAが公開エンドポイントに載っていることで崩れていた。旧SHAを参照する実行2件とデプロイ2件を削除して経路を塞いだ
+3. **ワークフローの権限が広すぎた。** `pages: write` と `id-token: write` をトップレベルに置いたため、ビルドするだけのジョブにも公開権限が付いていた。deploy ジョブ限定に変更
+4. **action がミュータブルタグで参照されていた。** タグは付け替えられるので、上流が乗っ取られると CI 上で任意コードが走る。commit SHA で固定した
+
+**この構成を壊さないための申し送り**
+
+- **`git config user.email` は noreply のまま維持する。** グローバル設定を変更済み。あわせて GitHub の Settings > Emails で「Keep my email addresses private」と「Block command line pushes that expose my email」を有効にしておくと、設定ミスを GitHub 側が止めてくれる（未設定）
+- **`.github/workflows/deploy.yml` の action は commit SHA で固定してある。タグに戻さないこと。** 更新は `.github/dependabot.yml` により週次で PR が上がるので、内容を見てからマージする
+- Secret scanning とプッシュ保護、Dependabot のセキュリティ更新を有効化済み。今後は鍵の誤コミットを push 時点で止めてくれる
+- ブランチ保護は**意図的に設定していない**。1人開発では force push がブロックされる手間のほうが大きいと判断した
+
+**確認できていないこと**
+
+- 旧コミットは SHA を直接指定すれば当分アクセスできる（GitHub が到達不能オブジェクトを保持するため）。公開エンドポイントからは辿れないので実質的な露出は止まっているが、完全消去には GitHub Support への GC 依頼が必要
+- `secret_scanning_non_provider_patterns` は API が受理しても有効にならなかった。無料の公開リポジトリでは対象外と思われる
+
 ## 2026-09-08 — Phase 5/6 完了（push 前まで）
 
 **やったこと**
