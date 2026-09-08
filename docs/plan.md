@@ -61,8 +61,10 @@
 
 ## Phase 5: 公開（逐次）
 
-- [ ] `.github/workflows/deploy.yml`、`vite.config.ts` の `base` 設定
+- [x] `.github/workflows/deploy.yml`、`vite.config.ts` の `base` 設定
+- [ ] **push と Pages の有効化（ユーザーが手動で実施）**
   - 完了の定義: main への push で Pages が更新され、**公開URLをスマホで開いて実際に遊べる**
+  - 手順は `README.md` の「公開URLで遊ぶ」を参照
 
 ---
 

@@ -6,6 +6,28 @@
 
 ---
 
+## 2026-09-08 — Phase 5/6 完了（push 前まで）
+
+**やったこと**
+- `.github/workflows/deploy.yml` — main への push で型チェックとテストを通してからビルドし、Pages に公開する。`dist/` はコミットせず Actions 側でビルドする（古い成果物が公開される事故を防ぐため）
+- ビルド出力が `/block-drop-game/assets/...` を指すことを確認
+- **クリーンな状態からの検証** — `node_modules` と `dist` を削除したうえで README に書く手順を順に実行し、install → test(155件) → build → dev 起動 → ブラウザで実際にプレイまで確認
+- `README.md` を実測した手順で作成
+- 13コミットに分割（Conventional Commits 準拠の日本語）。**HEAD だけを別ディレクトリに clone して install / typecheck / test / build が通ることを確認済み**
+
+**残っている作業（ユーザーが手動で実施）**
+1. `git push -u origin main`
+2. GitHub の Settings > Pages で Source を **GitHub Actions** に変更
+3. 公開URL `https://jyasukawa.github.io/block-drop-game/` をスマホで開いて動作確認
+
+**MVPの完成条件に対する達成状況**
+- ローカル環境では10項目すべて満たしている（実機で確認済み）
+- 「公開URLを開くと」の部分だけ、push 後でないと確認できない
+
+**次にやるとよいこと**
+- 操作感（`constants.ts` の `DAS_MS` / `ARR_MS` / `LOCK_DELAY_MS`）を実際に遊んで調整する。言葉では決まらない値なので、この段階で触るのが本来の目的
+- 効果音、Tスピン加点、ネクストの複数表示は `docs/requirements.md` で意図的に外している。入れるならスコープの拡大として扱う
+
 ## 2026-09-08 — Phase 4: 入出力 完了（ブラウザで遊べる状態）
 
 **やったこと**
