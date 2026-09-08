@@ -1,0 +1,18 @@
+# SHA 固定した action の更新を Dependabot に追わせる。
+# 固定するとセキュリティは上がるが、自分で追うと必ず放置される。
+# 更新の判断は PR として上がってくるので、内容を見てからマージできる。
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(ci)"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
